@@ -14,7 +14,7 @@ ui <- fluidPage(
     sidebarPanel(
       selectInput("species",
                   "Select a Species:",
-                  list("Caribou", "Burrowing Owl"))
+                  list("Caribou", "Burrowing Owl", "Marcus"))
     ),
     
     # Show a plot of the generated distribution
