@@ -1,6 +1,7 @@
 
-
 library(shiny)
+library(rgdal)
+library(leaflet)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -18,16 +19,25 @@ ui <- fluidPage(
     
     # Show a plot of the generated distribution
     mainPanel(
-      plotOutput("distPlot")
+      
+        leafletOutput("speciesplot")
     )
   )
 )
 
 # Define server logic required to draw a histogram
+
 server <- function(input, output) {
   
-  ## Add the maps here
+  alberta <- readOGR("GeoBoundaries", "BF ATS v4_1 Alberta Provincial Boundary")
+  caribou <- readOGR("SpeciesLayers/Caribou", "Caribou_Range")
   
+  output$speciesplot <- renderLeaflet({
+    leaflet() %>% 
+      addPolygons(data=alberta, weight=1, col = 'black') #%>%
+     # addPolygons(data=caribou, weight=1, col = 'red')
+
+})
 }
 
 # Run the application 
