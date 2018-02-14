@@ -31,17 +31,23 @@ server <- function(input, output) {
   
   alberta <- readOGR("GeoBoundaries", "BF ATS v4_1 Alberta Provincial Boundary")
   
-  caribou <- readOGR("SpeciesLayers/Caribou", "Caribou_Range")
-  caribou <- spTransform(caribou, 
+  Caribou <- readOGR("SpeciesLayers/Caribou", "Caribou_Range")
+  Caribou <- spTransform(Caribou, 
                          CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
   
-  
+  factpal <- colorFactor(topo.colors(15), Caribou$LOCALRANGE)
   
   output$speciesplot <- renderLeaflet({
     leaflet() %>% 
       addPolygons(data=alberta, weight=1, col = 'black') %>%
-      addPolygons(data=caribou, weight=1, col = 'red')
-
+      addPolygons(data=Caribou, stroke = FALSE, weight=1, col = ~factpal(LOCALRANGE)) %>% 
+      addTiles(urlTemplate = "https://mts1.google.com/vt/lyrs=s&hl=en&src=app&x={x}&y={y}&z={z}&s=G", attribution = 'Google') %>%
+      addLegend(pal = factpal,
+               values  = Caribou$LOCALRANGE,
+               position = "bottomright",
+               title = "Caribou Range",
+               labFormat = labelFormat(digits=1))
+    
 })
 }
 
