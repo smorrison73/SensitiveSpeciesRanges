@@ -8,20 +8,22 @@ library(RColorBrewer) #for coloring caribou herd ranges
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Mapping Sensitive Species"),
+  titlePanel("Mapping Sensitive Species in Alberta"),
   
   # Sidebar with a slider input for number of bins
   sidebarLayout(
     sidebarPanel(
       # selectInput("species",
       #             "Select a Species:",
-      #             c("Caribou", "Burrowing Owl", "Marcus"))
+      #             c("Caribou", "Burrowing Owl", "Eastern Short-horned Lizard"))
+      p("This app allows a user to display range maps for sensitive wildlife species within Alberta. The range maps were obtained from Alberta Environment and Parks (http://aep.alberta.ca/forms-maps-services/maps/wildlife-sensitivity-maps/default.aspx).")
     )
     ,
 
     # Show a plot of the generated distribution
     mainPanel(
-      leafletOutput("speciesplot")
+      p("Select the type of base map and which species you wish to display. Multiple species may be selected."),
+      leafletOutput("speciesplot", height = 600, width = 800)
     )
   )
 )
@@ -33,25 +35,33 @@ server <- function(input, output) {
   alberta <- readOGR("GeoBoundaries", "BF ATS v4_1 Alberta Provincial Boundary")
   
   # Read in caribou
-  Caribou <- readOGR("SpeciesLayers/Caribou", "Caribou_Range")
+  Caribou <- readOGR("SpeciesLayers/caribou", "Caribou_Range")
   Caribou <- spTransform(Caribou, 
                          CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
   
   # Read in burrowing owl  
-  BurrOwl <- readOGR("SpeciesLayers/BurrOwl", "Burrowing_Owl_Range")
+  BurrOwl <- readOGR("SpeciesLayers/burr_owl", "Burrowing_Owl_Range")
   BurrOwl <- spTransform(BurrOwl, 
                          CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
+  
+  # Read in Eastern Short-horned Lizard  
+  ESHLizard <- readOGR("SpeciesLayers/EasternSHLizard", "Eastern_Short_horned_Lizard_Range")
+  ESHLizard <- spTransform(ESHLizard, 
+                         CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
+  
+  
   
   #create map
   output$speciesplot <- renderLeaflet({
     leaflet() %>%
       
       # Set the location to center and zoom the map
-      setView(lng = -113, lat = 55, zoom = 4) %>%
+      setView(lng = -113, lat = 55, zoom = 5) %>%
     
       # Base maps
       addTiles(urlTemplate = "https://mts1.google.com/vt/lyrs=s&hl=en&src=app&x={x}&y={y}&z={z}&s=G", attribution = 'Google', group = "Google") %>%
       addProviderTiles(providers$Esri.WorldStreetMap, group = "Esri") %>%
+      # Adds a small map inset indicating the selected part of the world.
       addMiniMap(
         tiles = providers$Esri.WorldStreetMap,
         toggleDisplay = T) %>%
@@ -60,13 +70,14 @@ server <- function(input, output) {
       addPolygons(data=alberta, weight=2, fillColor = "transparent", stroke = TRUE, color = "black", group = "Alberta") %>%
       addPolygons(data=Caribou, opacity = 1, color = "blue", stroke = FALSE, weight=1, group = "Caribou") %>%
       addPolygons(data=BurrOwl, opacity = 1, color = "red", stroke = FALSE, weight=1, group = "Burrowing Owl") %>%
-      hideGroup(c("Caribou", "Burrowing Owl")) %>% # ensures the species are OFF by default
+      addPolygons(data=ESHLizard, opacity = 1, color = "red", stroke = FALSE, weight=1, group = "Eastern SH Lizard") %>%      
+      hideGroup(c("Caribou", "Burrowing Owl", "Eastern SH Lizard")) %>% # ensures the species are OFF by default
       
       
         # Layers control
       addLayersControl(
         baseGroups = c("Google", "Esri"),
-        overlayGroups = c("Caribou", "Burrowing Owl"),
+        overlayGroups = c("Caribou", "Burrowing Owl", "Eastern SH Lizard"),
         options = layersControlOptions(collapsed = FALSE)
       )
     
