@@ -49,7 +49,25 @@ server <- function(input, output) {
   ESHLizard <- spTransform(ESHLizard, 
                          CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
   
+  # Read in Greater Sage Grouse 
+  SageGrouse <- readOGR("SpeciesLayers/GreaterSageGrouseRange", "Greater_Sage_Grouse_Range")
+  SageGrouse <- spTransform(SageGrouse, 
+                           CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
   
+  # Read in Greater Sage Grouse 
+  Ords <- readOGR("SpeciesLayers/OrdsKangarooRatRange", "Ords_Kangaroo_Rat_Range")
+  Ords <- spTransform(Ords, 
+                            CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
+  
+  # Read in Sharp=tailed Grouse 
+  STGrouse <- readOGR("SpeciesLayers/Sharp-tailedGrouseSurvey", "Sharp_tailed_Grouse_Survey")
+  STGrouse <- spTransform(STGrouse, 
+                      CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
+  
+  # Read in Swift Fox 
+  SwiftFox <- readOGR("SpeciesLayers/SwiftFoxRange", "Swift_Fox_Range")
+  SwiftFox <- spTransform(SwiftFox, 
+                          CRS("+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"))
   
   #create map
   output$speciesplot <- renderLeaflet({
@@ -70,14 +88,18 @@ server <- function(input, output) {
       addPolygons(data=alberta, weight=2, fillColor = "transparent", stroke = TRUE, color = "black", group = "Alberta") %>%
       addPolygons(data=Caribou, opacity = 1, color = "blue", stroke = FALSE, weight=1, group = "Caribou") %>%
       addPolygons(data=BurrOwl, opacity = 1, color = "red", stroke = FALSE, weight=1, group = "Burrowing Owl") %>%
-      addPolygons(data=ESHLizard, opacity = 1, color = "red", stroke = FALSE, weight=1, group = "Eastern SH Lizard") %>%      
-      hideGroup(c("Caribou", "Burrowing Owl", "Eastern SH Lizard")) %>% # ensures the species are OFF by default
+      addPolygons(data=ESHLizard, opacity = 1, color = "green", stroke = FALSE, weight=1, group = "Eastern SH Lizard") %>%      
+      addPolygons(data=SageGrouse, opacity = 1, color = "purple", stroke = FALSE, weight=1, group = "Greater Sage Grouse") %>%
+      addPolygons(data=Ords, opacity = 1, color = "yellow", stroke = FALSE, weight=1, group = "Ord's Kangaroo Rat") %>%
+      addPolygons(data=STGrouse, opacity = 1, color = "yellow", stroke = FALSE, weight=1, group = "Sharp-tailed Grouse") %>%
+      addPolygons(data=SwiftFox, opacity = 1, color = "white", stroke = FALSE, weight=1, group = "Swift Fox") %>%
+      hideGroup(c("Caribou", "Burrowing Owl", "Eastern SH Lizard", "Greater Sage Grouse", "Ord's Kangaroo Rat", "Sharp-tailed Grouse", "Swift Fox")) %>% # ensures the species are OFF by default
       
       
         # Layers control
       addLayersControl(
         baseGroups = c("Google", "Esri"),
-        overlayGroups = c("Caribou", "Burrowing Owl", "Eastern SH Lizard"),
+        overlayGroups = c("Caribou", "Burrowing Owl", "Eastern SH Lizard", "Greater Sage Grouse", "Ord's Kangaroo Rat", "Sharp-tailed Grouse", "Swift Fox"),
         options = layersControlOptions(collapsed = FALSE)
       )
     
